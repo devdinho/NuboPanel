@@ -6,49 +6,50 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
 
   return (
-    <div className="layout-container">
-      <header id="header">
-        <nav className="main-nav">
-          <div className="nav-brand">
-            <Link to="/">
-              <h1>
-                <img src="/icon2.png" alt="Nubo Panel" />
-                Nubo Panel
-              </h1>
-            </Link>
-          </div>
-          <ul className="nav-links">
-            <li>
-              <Link 
-                to="/" 
-                className={location.pathname === '/' ? 'active' : ''}
-              >
-                Início
+    <>
+      <div className="layout-container">
+        <header id="header">
+          <nav className="main-nav">
+            <div className="nav-brand">
+              <Link to="/">
+                <h1>
+                  <img src="/logo.png" alt="Nubo Panel" />
+                </h1>
               </Link>
-            </li>
-            <li>
-              <Link 
-                to="/terminal" 
-                className={location.pathname === '/terminal' ? 'active' : ''}
-              >
-                Terminal
-              </Link>
-            </li>
-            <li>
-              <span className="nav-link disabled">Monitoramento</span>
-            </li>
-            <li>
-              <span className="nav-link disabled">Docker</span>
-            </li>
-            <li>
-              <span className="nav-link disabled">Deploy</span>
-            </li>
-          </ul>
-        </nav>
-      </header>
-      <main className="main-content">
-        {children}
-      </main>
-    </div>
+            </div>
+            <ul className="nav-links">
+              <li>
+                <Link 
+                  to="/" 
+                  className={location.pathname === '/' ? 'active' : ''}
+                >
+                  Início
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/terminal" 
+                  className={location.pathname === '/terminal' ? 'active' : ''}
+                >
+                  Terminal
+                </Link>
+              </li>
+              <li>
+                <span className="nav-link disabled">Monitoramento</span>
+              </li>
+              <li>
+                <span className="nav-link disabled">Docker</span>
+              </li>
+              <li>
+                <span className="nav-link disabled">Deploy</span>
+              </li>
+            </ul>
+          </nav>
+        </header>
+        <main className="main-content">
+          {children}
+        </main>
+      </div>
+    </>
   );
 }

@@ -6,10 +6,8 @@ const Home = () => {
   return (
     <div className="home-container">
       <header className="home-header">
-        <h1>
-          <img src="/icon2.png" alt="Nubo Panel" />
-          Nubo Panel
-        </h1>
+        <img src="/icon2.png" alt="Nubo Panel" />
+        <img src="/logo2.png" alt="Nubo Panel" />
         <p>Painel administrativo e operacional moderno</p>
       </header>
 
@@ -84,7 +82,11 @@ const Home = () => {
       </main>
 
       <footer className="home-footer">
-        <p>Desenvolvido com ❤️ para administração de infraestrutura</p>
+        <div>
+          <p>© 2025 A6N Tecnologia. Todos os direitos reservados.</p>
+          <p>Desenvolvido com ❤️ para administração moderna de infraestrutura.</p>
+          {/* <p>CNPJ: 00.000.000/0001-00 • Rua Exemplo, 123 • São Paulo/SP</p> */}
+        </div>
       </footer>
     </div>
   );

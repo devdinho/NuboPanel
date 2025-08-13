@@ -156,10 +156,7 @@ const Terminal = () => {
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ fontSize: '1.5rem' }}>🖥️</span>
-            <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600 }}>Terminal Web</h1>
-          </div>
+
           <Link 
             to="/" 
             style={{
@@ -191,7 +188,7 @@ const Terminal = () => {
           style={{
             flex: 1,
             backgroundColor: "#1e1e1e",
-            padding: "0",
+            padding: "0 0 0 10px",
             margin: "0",
             boxSizing: "border-box"
           }}

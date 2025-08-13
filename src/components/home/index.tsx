@@ -1,8 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './index.css';
+import { useHeader } from '../../contexts/HeaderContext';
 
 const Home = () => {
+  const { setShowHeader } = useHeader();
+
+  // Garante que o header permaneça oculto na página inicial
+  useEffect(() => {
+    setShowHeader(false);
+  }, [setShowHeader]);
   return (
     <div className="home-container">
       <header className="home-header">
@@ -25,19 +32,10 @@ const Home = () => {
           <div className="feature-card">
             <div className="feature-icon">📊</div>
             <h3>Observabilidade de Infraestrutura</h3>
-            <p>Monitore CPU, RAM, disco e temperatura com dashboard de status do sistema</p>
-            <div className="feature-link disabled">
-              Em breve
-            </div>
-          </div>
-
-          <div className="feature-card">
-            <div className="feature-icon">🐳</div>
-            <h3>Monitoramento Docker</h3>
-            <p>Gerencie containers com listagem, logs em tempo real e ações de start/stop/restart</p>
-            <div className="feature-link disabled">
-              Em breve
-            </div>
+            <p>Monitoramento em tempo real de recursos do sistema, containers Docker e métricas de performance.</p>
+            <Link to="/monitoring" className="feature-link">
+              Acessar Monitoramento
+            </Link>
           </div>
 
           <div className="feature-card">

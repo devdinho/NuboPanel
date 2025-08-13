@@ -170,3 +170,6 @@ body {
 .footer-links a:hover {
   text-decoration: underline;
 }
+.logo-sm {
+  height: 40px;
+}

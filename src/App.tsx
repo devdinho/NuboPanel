@@ -4,23 +4,32 @@ import './App.css';
 import Layout from './components/Layout';
 import Home from './components/home';
 import Terminal from './components/terminal';
+import Monitoring from './components/monitoring';
+import { HeaderProvider } from './contexts/HeaderContext';
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={
-          <Layout>
-            <Home />
-          </Layout>
-        } />
-        <Route path="/terminal" element={
-          <Layout>
-            <Terminal />
-          </Layout>
-        } />
-      </Routes>
-    </Router>
+    <HeaderProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={
+            <Layout>
+              <Home />
+            </Layout>
+          } />
+          <Route path="/terminal" element={
+            <Layout>
+              <Terminal />
+            </Layout>
+          } />
+          <Route path="/monitoring" element={
+            <Layout>
+              <Monitoring />
+            </Layout>
+          } />
+        </Routes>
+      </Router>
+    </HeaderProvider>
   );
 }
 

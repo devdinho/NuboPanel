@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from 'react-router-dom';
 import { FitAddon } from 'xterm-addon-fit';
+import { useHeader } from '../../contexts/HeaderContext';
 
 const BASE_SOCKET_URL: string = import.meta.env.VITE_SOCKET_URL as string;
 const SOCKET_PATH = "/terminal/socket.io";
@@ -43,6 +44,11 @@ const Terminal = () => {
   const terminalRef = useRef(null);
   const termInstance = useRef(null);
   const socketInstance = useRef(null);
+  const { setShowHeader } = useHeader();
+
+  useEffect(() => {
+    setShowHeader(false);
+  }, [setShowHeader]);
 
   useEffect(() => {
     let Terminal, io;

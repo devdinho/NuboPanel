@@ -48,6 +48,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <li>
                   <span className="nav-link disabled">Deploy</span>
                 </li>
+                  <li>
+                    <Link
+                      to="/powershift"
+                      className={location.pathname === '/powershift' ? 'active' : ''}
+                    >
+                      PowerShift
+                    </Link>
+                  </li>
               </ul>
             </nav>
           </header>

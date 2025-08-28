@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import Layout from './components/Layout';
@@ -28,11 +28,11 @@ function App() {
               <Monitoring />
             </Layout>
           } />
-            <Route path="/powershift" element={
-              <Layout>
-                <PowerShift />
-              </Layout>
-            } />
+          <Route path="/powershift" element={
+            <Layout>
+              <PowerShift />
+            </Layout>
+          } />
         </Routes>
       </Router>
     </HeaderProvider>

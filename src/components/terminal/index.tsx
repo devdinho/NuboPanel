@@ -1,14 +1,12 @@
 import React, { useEffect, useRef } from "react";
 import { Link } from 'react-router-dom';
+import { Terminal as XTerminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
+import 'xterm/css/xterm.css';
 import { useHeader } from '../../contexts/HeaderContext';
 
 const BASE_SOCKET_URL: string = import.meta.env.VITE_SOCKET_URL as string;
-const SOCKET_PATH = "/terminal/socket.io";
 const TOKEN : string = import.meta.env.VITE_TOKEN as string;
-const SOCKET_URL: string = `${BASE_SOCKET_URL}/terminal`;
-console.log("BASE_SOCKET_URL:", BASE_SOCKET_URL);
-console.log("SOCKET_URL:", SOCKET_URL);
 
 // Configurações do terminal
 const TERMINAL_OPTIONS = {
@@ -41,9 +39,9 @@ const TERMINAL_OPTIONS = {
 };
 
 const Terminal = () => {
-  const terminalRef = useRef(null);
-  const termInstance = useRef(null);
-  const socketInstance = useRef(null);
+  const terminalRef = useRef<HTMLDivElement>(null);
+  const termInstance = useRef<any>(null);
+  const socketInstance = useRef<WebSocket | null>(null);
   const { setShowHeader } = useHeader();
 
   useEffect(() => {
@@ -51,70 +49,91 @@ const Terminal = () => {
   }, [setShowHeader]);
 
   useEffect(() => {
-    let Terminal, io;
-    let term, socket;
+  let term: XTerminal;
+  let ws: WebSocket;
 
     const loadScripts = async () => {
-      if (!window.Terminal) {
-        await new Promise((resolve) => {
-          const script = document.createElement("script");
-          script.src = "https://cdn.jsdelivr.net/npm/xterm/lib/xterm.js";
-          script.onload = resolve;
-          document.body.appendChild(script);
-        });
-      }
-      if (!window.io) {
-        await new Promise((resolve) => {
-          const script = document.createElement("script");
-          script.src =
-            "https://cdn.jsdelivr.net/npm/socket.io-client/dist/socket.io.min.js";
-          script.onload = resolve;
-          document.body.appendChild(script);
-        });
-      }
+  term = new XTerminal(TERMINAL_OPTIONS);
+  term.open(terminalRef.current);
+  term.focus();
 
-      Terminal = window.Terminal;
-      io = window.io;
+      // Monta a URL do WebSocket puro
+      const wsUrl = `${BASE_SOCKET_URL.replace(/^http/, 'ws')}/terminal?token=${TOKEN}`;
+      ws = new window.WebSocket(wsUrl);
 
-      term = new Terminal(TERMINAL_OPTIONS);
-      term.open(terminalRef.current);
+      ws.onopen = () => {
+        resizeTerminal();
+      };
 
-      socket = io(SOCKET_URL, {
-        path: SOCKET_PATH,
-        auth: { token: TOKEN },
+      let lastCommand = '';
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'output' && msg.data) {
+            // Filtra o comando digitado da primeira linha do output
+            let output = msg.data;
+            const lines = output.split('\n');
+            if (lines.length > 1 && lines[0].trim() === lastCommand.trim()) {
+              output = lines.slice(1).join('\n');
+            }
+            term.write(output);
+          }
+        } catch {
+          term.write(event.data); // fallback para texto puro
+        }
+      };
+
+      ws.onerror = () => {
+        term.write('\r\nErro na conexão WebSocket\r\n');
+      };
+
+      ws.onclose = () => {
+        term.write('\r\nConexão encerrada\r\n');
+      };
+
+      let inputBuffer = '';
+      term.onKey(({ key, domEvent }) => {
+        if (domEvent.key === 'Enter') {
+          lastCommand = inputBuffer;
+          term.write('\r\n');
+          ws.send(JSON.stringify({ type: 'input', data: inputBuffer + '\n' }));
+          inputBuffer = '';
+        } else if (domEvent.key === 'Backspace') {
+          // Remove último caractere do buffer e do terminal
+          if (inputBuffer.length > 0) {
+            inputBuffer = inputBuffer.slice(0, -1);
+            term.write('\b \b');
+          }
+        } else if (domEvent.key.length === 1) {
+          inputBuffer += key;
+          term.write(key);
+        }
       });
 
-      socket.on("output", (data) => {
-        term.write(data);
-      });
-
-      term.onData((data) => {
-        socket.emit("input", data);
-      });
-      
       const fitAddon = new FitAddon();
       term.loadAddon(fitAddon);
-      
+
       const resizeTerminal = () => {
         setTimeout(() => {
           fitAddon.fit();
-          socket.emit("resize", {
+          ws.send(JSON.stringify({
+            type: 'resize',
             cols: term.cols,
             rows: term.rows,
-          });
+          }));
+          term.focus();
         }, 100);
       };
 
       window.addEventListener("resize", resizeTerminal);
-      resizeTerminal();
 
       termInstance.current = term;
-      socketInstance.current = socket;
+      socketInstance.current = ws;
 
       return () => {
         window.removeEventListener("resize", resizeTerminal);
         term.dispose();
-        socket.disconnect();
+        ws.close();
       };
     };
 
@@ -122,16 +141,13 @@ const Terminal = () => {
 
     return () => {
       if (termInstance.current) termInstance.current.dispose();
-      if (socketInstance.current) socketInstance.current.disconnect();
+      if (socketInstance.current) socketInstance.current.close();
     };
   }, []);
 
   return (
     <>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/xterm/css/xterm.css"
-      />
+  {/* xterm.css já importado via import */}
       <style>{`
         .xterm {
           height: 100% !important;
@@ -175,12 +191,14 @@ const Terminal = () => {
               transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(116, 81, 171, 0.25)';
-              e.target.style.color = '#fff';
+              const target = e.target as HTMLElement;
+              target.style.background = 'rgba(116, 81, 171, 0.25)';
+              target.style.color = '#fff';
             }}
             onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(116, 81, 171, 0.15)';
-              e.target.style.color = 'rgba(255, 255, 255, 0.8)';
+              const target = e.target as HTMLElement;
+              target.style.background = 'rgba(116, 81, 171, 0.15)';
+              target.style.color = 'rgba(255, 255, 255, 0.8)';
             }}
           >
             ← Voltar ao Início
@@ -191,12 +209,16 @@ const Terminal = () => {
         <div
           id="terminal"
           ref={terminalRef}
+            tabIndex={0}
           style={{
             flex: 1,
             backgroundColor: "#1e1e1e",
             padding: "0 0 0 10px",
             margin: "0",
-            boxSizing: "border-box"
+            boxSizing: "border-box",
+            minHeight: "300px",
+            height: "100%",
+            width: "100%"
           }}
         ></div>
 
